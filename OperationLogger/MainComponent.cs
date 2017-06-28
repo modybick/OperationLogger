@@ -174,7 +174,7 @@ namespace OperationLogger
                     string logStr = "," + strOperationTime + "," + strNoOperationTime;
                     //一時ログファイルに書き出す
                     StreamWriter sw = new StreamWriter(TEMPLOG, true, Encoding.GetEncoding("Shift_JIS"));
-                    sw.Write(logStr);
+                    sw.Write(logStr);   //改行しない
                     sw.Close();
                 });
                 writeLogTask.Start();
@@ -212,7 +212,7 @@ namespace OperationLogger
             }
             //一時ログファイルにログを書き出し
             StreamWriter sw1 = new StreamWriter(TEMPLOG, true, Encoding.GetEncoding("Shift_JIS"));
-            sw1.Write(logStr);
+            sw1.Write(logStr);  //改行しない
             sw1.Close();
             //一時ログを本ログファイルに書き出し
             StreamReader sr = new StreamReader(TEMPLOG);

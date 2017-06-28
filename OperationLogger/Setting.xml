@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Settings>
-  <JudgeTimeSpan>1</JudgeTimeSpan>
+  <JudgeTimeSpan>30</JudgeTimeSpan>
   <EnableKeyboardHook>true</EnableKeyboardHook>
   <EnableMouseMoveHook>true</EnableMouseMoveHook>
   <EnableMouseClickHook>true</EnableMouseClickHook>
