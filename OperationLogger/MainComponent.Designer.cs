@@ -36,9 +36,9 @@ namespace OperationLogger
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem_Exit = new System.Windows.Forms.ToolStripMenuItem();
+            this.mouseHook = new OperationLogger.MouseHook();
+            this.keyboardHook = new OperationLogger.KeyboardHook();
             this.contextMenuStrip.SuspendLayout();
-            this.keyboardHook = new KeyboardHook();
-            this.mouseHook = new MouseHook();
             // 
             // notifyIcon
             // 
@@ -61,10 +61,15 @@ namespace OperationLogger
             this.toolStripMenuItem_Exit.Size = new System.Drawing.Size(120, 30);
             this.toolStripMenuItem_Exit.Text = "終了";
             this.toolStripMenuItem_Exit.ToolTipText = "プログラムを終了します。";
+            // 
+            // mouseHook
+            // 
+            this.mouseHook.MouseHooked += new OperationLogger.MouseHookedEventHandler(this.mouseHook_MouseHooked);
+            // 
+            // keyboardHook
+            // 
+            this.keyboardHook.KeyboardHooked += new OperationLogger.KeyboardHookedEventHandler(this.keyboardHook_KeyboardHooked);
             this.contextMenuStrip.ResumeLayout(false);
-            //フックイベントの設定
-            this.keyboardHook.KeyboardHooked += keyboardHook_KeyboardHooked;
-            this.mouseHook.MouseHooked += mouseHook_MouseHooked;
 
         }
 
@@ -73,7 +78,7 @@ namespace OperationLogger
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_Exit;
-        private KeyboardHook keyboardHook;
         private MouseHook mouseHook;
+        private KeyboardHook keyboardHook;
     }
 }

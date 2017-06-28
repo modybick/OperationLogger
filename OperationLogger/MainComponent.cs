@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Xml;
 
 namespace OperationLogger
@@ -12,7 +11,6 @@ namespace OperationLogger
     public partial class MainComponent : Component
     {
         //変数の定義
-        DateTime _startDatetime;            //アプリの起動日時
         DateTime _termStartDatetime;        //計測周期のスタート日時
         DateTime _lastOperationDatetime;    //最後に操作した日時
         TimeSpan _judgeTimeSpan;            //無操作の判定時間
@@ -36,9 +34,8 @@ namespace OperationLogger
             // TODO:設定データの読み込み
 
             // 変数の初期化
-            _startDatetime = DateTime.Now;           //現在時刻を代入
-            _termStartDatetime = _startDatetime;      //開始時はイコール
-            _lastOperationDatetime = _startDatetime;  //開始時はイコール
+            _termStartDatetime = DateTime.Now;           //現在時刻を代入
+            _lastOperationDatetime = _termStartDatetime;  //開始時はイコール
 
             //設定から値を読み込む
             XmlDocument xmlDoc = new XmlDocument();
@@ -96,8 +93,8 @@ namespace OperationLogger
         {
             //書き込むstringの作成 "PC名,日付,時刻,"
             string hostName = Environment.MachineName;
-            string strDate = _startDatetime.ToShortDateString();
-            string strTime = _startDatetime.ToShortTimeString();
+            string strDate = _termStartDatetime.ToShortDateString();
+            string strTime = _termStartDatetime.ToShortTimeString();
             string logStr = hostName + "," + strDate + "," + strTime;
 
             //ファイルの作成・書き込み
@@ -229,6 +226,5 @@ namespace OperationLogger
             //一時ファイルを消去
             File.Delete(TEMPLOG);
         }
-
     }
 }
