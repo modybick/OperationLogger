@@ -16,9 +16,9 @@ namespace OperationLogger
         DateTime _lastOperationDatetime; //最後に操作した日時
         TimeSpan _judgeTimeSpan;         //無操作の判定時間
 
-        Boolean _enableKeyboardHook;     //キーボードをフックするか
-        Boolean _enableMouseMoveHook;    //マウスの動きをフックするか
-        Boolean _enableMouseClickHook;       //マウスクリックをフックするか
+        bool _enableKeyboardHook;     //キーボードをフックするか
+        bool _enableMouseMoveHook;    //マウスの動きをフックするか
+        bool _enableMouseClickHook;       //マウスクリックをフックするか
 
         static string SETTINGFILE = "Setting.ini";      //設定ファイルの名前
         static string LOGFILE = "OperationLog.csv";     //ログファイルの名前
@@ -61,7 +61,7 @@ namespace OperationLogger
 
                 //残っている一時ログに異常終了を示す値を付加して本ログに書き込む
 
-                String logStr;  //書き込むレコード
+                string logStr;  //書き込むレコード
                 //一時ログファイルの読み込み
                 StreamReader sr = new StreamReader(TEMPLOG, Encoding.GetEncoding("Shift_JIS"));
                 logStr = sr.ReadLine() + ",ABEND";
@@ -84,11 +84,11 @@ namespace OperationLogger
         /// </summary>
         private void makeTempLog()
         {
-            //書き込むStringの作成 "PC名,日付,時刻,"
-            String hostName = Environment.MachineName;
-            String strDate = _startDatetime.ToShortDateString();
-            String strTime = _startDatetime.ToShortTimeString();
-            String logStr = hostName + "," + strDate + "," + strTime;
+            //書き込むstringの作成 "PC名,日付,時刻,"
+            string hostName = Environment.MachineName;
+            string strDate = _startDatetime.ToShortDateString();
+            string strTime = _startDatetime.ToShortTimeString();
+            string logStr = hostName + "," + strDate + "," + strTime;
 
             //ファイルの作成・書き込み
             StreamWriter sw = new StreamWriter(TEMPLOG, false, Encoding.GetEncoding("Shift_JIS"));
@@ -116,7 +116,7 @@ namespace OperationLogger
         {
             Debug.WriteLine("Keyboard Hooked.");
             //_enableKeyboardHookの値がfalseなら抜ける
-            if (!_enableKeyboardHook) { return; }
+            if (_enableKeyboardHook == false) { return; }
             // TODO:設定でON/OFFできるようにする
             //現在時刻等をログメソッドに送る
             processingOperation(_termStartDatetime, _lastOperationDatetime, DateTime.Now);
@@ -134,12 +134,12 @@ namespace OperationLogger
             if (e.Message == MouseMessage.Move)
             {   //マウスムーブの場合
                 //_enableMouseMoveHookの値がfalseであれば抜ける
-                if (!_enableMouseMoveHook) { return; }
+                if (_enableMouseMoveHook == false) { return; }
             }
             else
             {   //マウスムーブ以外の場合
                 //_enableMouseClickHookの値がfalseであれば抜ける
-                if (!_enableMouseClickHook) { return; }
+                if (_enableMouseClickHook == false) { return; }
             }
             // TODO:設定でON/OFFできるようにする
             //現在時刻等をログメソッドに送る
@@ -162,12 +162,12 @@ namespace OperationLogger
                 {
                     //書き出す文字列を作成
                     TimeSpan operationTime = lastOperationDatetime - termStartDatetime;
-                    String strOperationTime =
+                    string strOperationTime =
                         operationTime.Hours.ToString() + ":" + operationTime.Minutes.ToString();
                     TimeSpan noOperationTime = nowDatetime - lastOperationDatetime;
-                    String strNoOperationTime =
+                    string strNoOperationTime =
                         noOperationTime.Hours.ToString() + ":" + noOperationTime.Minutes.ToString();
-                    String logStr = "," + strOperationTime + "," + strNoOperationTime;
+                    string logStr = "," + strOperationTime + "," + strNoOperationTime;
                     //一時ログファイルに書き出す
                     StreamWriter sw = new StreamWriter(TEMPLOG, true, Encoding.GetEncoding("Shift_JIS"));
                     sw.Write(logStr);
@@ -185,24 +185,24 @@ namespace OperationLogger
         /// </summary>
         public void endProcess()
         {
-            String logStr;
+            string logStr;
             DateTime nowDatetime = DateTime.Now;
             //最後のログを書き込んだ一時ログを本ログファイルに書き出し
             if ((nowDatetime - _lastOperationDatetime) > _judgeTimeSpan)
             {   //無操作と判定された場合
                 //書き出す文字列を作成
                 TimeSpan operationTime = _lastOperationDatetime - _termStartDatetime;
-                String strOperationTime =
+                string strOperationTime =
                     operationTime.Hours.ToString() + ":" + operationTime.Minutes.ToString();
                 TimeSpan noOperationTime = nowDatetime - _lastOperationDatetime;
-                String strNoOperationTime =
+                string strNoOperationTime =
                     noOperationTime.Hours.ToString() + ":" + noOperationTime.Minutes.ToString();
                 logStr = "," + strOperationTime + "," + strNoOperationTime;
             }
             else
             {   //操作ありと判定された場合
                 TimeSpan operationTime = nowDatetime - _termStartDatetime;
-                String strOperationTime =
+                string strOperationTime =
                     operationTime.Hours.ToString() + ":" + operationTime.Minutes.ToString();
                 logStr = "," + strOperationTime;
             }
