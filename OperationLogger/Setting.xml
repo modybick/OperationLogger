@@ -1,4 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--
+OperationLoggerの設定ファイル
+JudgeTimeSpan:無操作の判定時間（分）
+EnableKeyboardHook:キーボード入力を操作とみなすかどうか（ture=操作とみなす:false=みなさない）
+EnableMouseMoveHook:マウス移動を操作とみなすかどうか（ture=操作とみなす:false=みなさない）
+EnableMouseClickHook:マウスクリックを操作とみなすかどうか（ture=操作とみなす:false=みなさない）
+※マウスクリックは、マウス移動以外のマウス操作が含まれる（ホイールなど）
+-->
+
 <Settings>
   <JudgeTimeSpan>30</JudgeTimeSpan>
   <EnableKeyboardHook>true</EnableKeyboardHook>
