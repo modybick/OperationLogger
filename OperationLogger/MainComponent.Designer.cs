@@ -61,6 +61,7 @@ namespace OperationLogger
             this.toolStripMenuItem_Exit.Size = new System.Drawing.Size(120, 30);
             this.toolStripMenuItem_Exit.Text = "終了";
             this.toolStripMenuItem_Exit.ToolTipText = "プログラムを終了します。";
+            this.toolStripMenuItem_Exit.Click += new System.EventHandler(this.toolStripMenuItem_Exit_Click);
             // 
             // mouseHook
             // 

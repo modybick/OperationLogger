@@ -28,9 +28,6 @@ namespace OperationLogger
             //コンポーネントの初期化
             InitializeComponent();
 
-            //コンテキストメニューのイベントを設定
-            this.toolStripMenuItem_Exit.Click += ToolStripMenuItem_Exit_Click;
-
             // TODO:設定データの読み込み
 
             // 変数の初期化
@@ -108,7 +105,7 @@ namespace OperationLogger
         /// </summary>
         /// <param name="sender">呼び出し元オブジェクト</param>
         /// <param name="e">イベントデータ</param>
-        private void ToolStripMenuItem_Exit_Click(object sender, EventArgs e)
+        private void toolStripMenuItem_Exit_Click(object sender, EventArgs e)
         {
             //現在のアプリケーションの終了
             System.Windows.Application.Current.Shutdown();

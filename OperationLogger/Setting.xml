@@ -2,6 +2,6 @@
 <Settings>
   <JudgeTimeSpan>1</JudgeTimeSpan>
   <EnableKeyboardHook>true</EnableKeyboardHook>
-  <EnableMouseMoveHook>false</EnableMouseMoveHook>
+  <EnableMouseMoveHook>true</EnableMouseMoveHook>
   <EnableMouseClickHook>true</EnableMouseClickHook>
 </Settings>
