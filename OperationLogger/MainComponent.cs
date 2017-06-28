@@ -5,24 +5,25 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Xml;
 
 namespace OperationLogger
 {
     public partial class MainComponent : Component
     {
         //変数の定義
-        DateTime _startDatetime;         //アプリの起動日時
-        DateTime _termStartDatetime;     //計測周期のスタート日時
-        DateTime _lastOperationDatetime; //最後に操作した日時
-        TimeSpan _judgeTimeSpan;         //無操作の判定時間
+        DateTime _startDatetime;            //アプリの起動日時
+        DateTime _termStartDatetime;        //計測周期のスタート日時
+        DateTime _lastOperationDatetime;    //最後に操作した日時
+        TimeSpan _judgeTimeSpan;            //無操作の判定時間
 
-        bool _enableKeyboardHook;     //キーボードをフックするか
-        bool _enableMouseMoveHook;    //マウスの動きをフックするか
-        bool _enableMouseClickHook;       //マウスクリックをフックするか
+        bool _enableKeyboardHook;           //キーボードをフックするか
+        bool _enableMouseMoveHook;          //マウスの動きをフックするか
+        bool _enableMouseClickHook;         //マウスクリックをフックするか
 
-        static string SETTINGFILE = "Setting.ini";      //設定ファイルの名前
-        static string LOGFILE = "OperationLog.csv";     //ログファイルの名前
-        static string TEMPLOG = "TempLog.csv";          //一時ログファイルの名前
+        const string SETTINGFILE = "Setting.xml";      //設定ファイルの名前
+        const string LOGFILE = "OperationLog.csv";     //ログファイルの名前
+        const string TEMPLOG = "TempLog.csv";          //一時ログファイルの名前
 
         public MainComponent()
         {
@@ -38,11 +39,20 @@ namespace OperationLogger
             _startDatetime = DateTime.Now;           //現在時刻を代入
             _termStartDatetime = _startDatetime;      //開始時はイコール
             _lastOperationDatetime = _startDatetime;  //開始時はイコール
-            // TODO:設定から読み込むように変更する
-            _judgeTimeSpan = TimeSpan.FromMinutes(1);   //ひとまず1分で無操作判定
-            _enableKeyboardHook = false;
-            _enableMouseMoveHook = true;
-            _enableMouseClickHook = false;
+
+            //設定から値を読み込む
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(SETTINGFILE);
+            XmlElement rootElement = xmlDoc.DocumentElement;
+            _judgeTimeSpan =
+                TimeSpan.FromMinutes(int.Parse(
+                    rootElement.GetElementsByTagName("JudgeTimeSpan").Item(0).InnerText));
+            _enableKeyboardHook =
+                bool.Parse(rootElement.GetElementsByTagName("EnableKeyboardHook").Item(0).InnerText);
+            _enableMouseMoveHook =
+                bool.Parse(rootElement.GetElementsByTagName("EnableMouseMoveHook").Item(0).InnerText);
+            _enableMouseClickHook =
+                bool.Parse(rootElement.GetElementsByTagName("EnableMouseClickHook").Item(0).InnerText);
 
             //前回異常終了していないか調べ,異常終了している場合は対処する
             dealAbEnd();
