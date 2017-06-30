@@ -282,7 +282,6 @@ namespace OperationLogger
             writeLogStr(TEMPLOG, logStr, false);
             //一時ログをすべて読み込み
             StreamReader sr = new StreamReader(TEMPLOG);
-            logStr = sr.ReadToEnd();
             //一時ログを本ログファイルに書き出し
             writeLogStr(LOGFILE, sr.ReadToEnd(), true);
             sr.Close();
