@@ -14,7 +14,7 @@ namespace OperationLogger
         DateTime _termStartDateTime;        //計測周期のスタート日時
         DateTime _lastOperationDateTime;    //最後に操作した日時
         TimeSpan _judgeTimeSpan;            //無操作の判定時間
-        TimeSpan _dayRemainingTime;          //その日の残り時間
+        TimeSpan _dayRemainingTime;         //その日の残り時間
 
         bool _enableKeyboardHook;           //キーボードをフックするか
         bool _enableMouseMoveHook;          //マウスの動きをフックするか
@@ -24,40 +24,63 @@ namespace OperationLogger
         const string LOGFILE = "OperationLog.csv";     //ログファイルの名前
         const string TEMPLOG = "TempLog.csv";          //一時ログファイルの名前
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public MainComponent()
         {
             //コンポーネントの初期化
             InitializeComponent();
-
-            // TODO:設定データの読み込み
 
             // 変数の初期化
             _termStartDateTime = DateTime.Now;              //現在時刻を代入
             _lastOperationDateTime = _termStartDateTime;    //開始時はイコール
             _dayRemainingTime = TimeSpan.FromDays(1) - _termStartDateTime.TimeOfDay;    //一日の残り時間
 
-
             //設定から値を読み込む
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(SETTINGFILE);
-            XmlElement rootElement = xmlDoc.DocumentElement;
-            _judgeTimeSpan =
-                TimeSpan.FromMinutes(int.Parse(
-                    rootElement.GetElementsByTagName("JudgeTimeSpan").Item(0).InnerText));
-            _enableKeyboardHook =
-                bool.Parse(rootElement.GetElementsByTagName("EnableKeyboardHook").Item(0).InnerText);
-            _enableMouseMoveHook =
-                bool.Parse(rootElement.GetElementsByTagName("EnableMouseMoveHook").Item(0).InnerText);
-            _enableMouseClickHook =
-                bool.Parse(rootElement.GetElementsByTagName("EnableMouseClickHook").Item(0).InnerText);
-
+            roadSettings();
             //前回異常終了していないか調べ,異常終了している場合は対処する
             dealAbEnd();
-            //一時ログファイルの作成
-            makeTempLog();
-
+            //一時ログファイルの作成・先頭の書き込み
+            string logStr = makeTempLogRecord(
+                _termStartDateTime.ToShortDateString(), _termStartDateTime.ToShortTimeString());
+            writeLogStr(TEMPLOG, logStr, false);
         }
 
+        /// <summary>
+        /// 設定ファイルを読み込む。
+        /// 読み込みに失敗したら、デフォルトの設定を適用する。
+        /// </summary>
+        /// <returns>読み込み成功=true,読み込み失敗=false</returns>
+        private bool roadSettings()
+        {
+            bool result;
+            try
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(SETTINGFILE);
+                XmlElement rootElement = xmlDoc.DocumentElement;
+                _judgeTimeSpan =
+                    TimeSpan.FromMinutes(int.Parse(
+                        rootElement.GetElementsByTagName("JudgeTimeSpan").Item(0).InnerText));
+                _enableKeyboardHook =
+                    bool.Parse(rootElement.GetElementsByTagName("EnableKeyboardHook").Item(0).InnerText);
+                _enableMouseMoveHook =
+                    bool.Parse(rootElement.GetElementsByTagName("EnableMouseMoveHook").Item(0).InnerText);
+                _enableMouseClickHook =
+                    bool.Parse(rootElement.GetElementsByTagName("EnableMouseClickHook").Item(0).InnerText);
+                result = true;
+            }
+            catch
+            {   //読み込みに失敗した場合はデフォルトの設定を適用する
+                _judgeTimeSpan = TimeSpan.FromMinutes(30);
+                _enableKeyboardHook = true;
+                _enableMouseMoveHook = true;
+                _enableMouseClickHook = true;
+                result = false;
+            }
+            return result;
+        }
         /// <summary>
         /// 前回異常終了していないか調べ、している場合は対処する
         /// </summary>
@@ -73,32 +96,39 @@ namespace OperationLogger
                 StreamReader sr = new StreamReader(TEMPLOG, Encoding.GetEncoding("Shift_JIS"));
                 logStr = sr.ReadLine() + ",ABEND";
                 sr.Close();
-
                 //本ログファイルへの書き込み（追加で書き込む）
-                StreamWriter sw = new StreamWriter(LOGFILE, true, Encoding.GetEncoding("Shift_JIS"));
-                sw.WriteLine(logStr);
-                sw.Close();
-
+                writeLogStr(LOGFILE, logStr, true);
                 //一時ログの削除
                 File.Delete(TEMPLOG);
             }
-
         }
 
         /// <summary>
-        /// 一時ログレコードを作成する
+        /// 一時ログのレコードの先頭に書き込むための文字列を作成する
         /// </summary>
-        private void makeTempLog()
+        /// <returns>一時ログの先頭文字列</returns>
+        /// <param name="strDate">レコードの日付</param>
+        /// <param name="strTime">レコードの開始時刻</param>
+        private string makeTempLogRecord(string strDate, string strTime)
         {
-            //書き込むstringの作成 "PC名,日付,時刻,"
+            //書き込むstringの作成 "PC名,日付,時刻"
             string hostName = Environment.MachineName;
-            string strDate = _termStartDateTime.ToShortDateString();
-            string strTime = _termStartDateTime.ToShortTimeString();
             string logStr = hostName + "," + strDate + "," + strTime;
+            return logStr;
+        }
 
+        /// <summary>
+        /// ログを書き込む
+        /// </summary>
+        /// <param name="fileName">書き込むファイル名</param>
+        /// <param name="logStr">書き込む文字列</param>
+        /// <param name="bNewLine">改行する=true,しない=false</param>
+        private void writeLogStr(string fileName, string logStr, bool bNewLine)
+        {
             //ファイルの作成・書き込み
-            StreamWriter sw = new StreamWriter(TEMPLOG, false, Encoding.GetEncoding("Shift_JIS"));
-            sw.Write(logStr);   //改行はしない
+            StreamWriter sw = new StreamWriter(fileName, true, Encoding.GetEncoding("Shift_JIS"));
+            if (bNewLine) { sw.WriteLine(logStr); } //改行する
+            else { sw.Write(logStr); } //改行しない
             sw.Close();
         }
 
@@ -186,49 +216,40 @@ namespace OperationLogger
         /// <param name="isOperationTime">操作時間=true,無操作時間=false</param>
         public void writeTempLog(DateTime termStartDateTime, TimeSpan writeTime, bool isOperationTime)
         {
-            //一時ログファイルを開く
-            StreamWriter sw = new StreamWriter(TEMPLOG, true, Encoding.GetEncoding("Shift_JIS"));
-            string strWriteTime;    //00:00形式の操作・無操作時間文字列
-            string logStr;          //一時ログに書き込む文字列
-
+            string strWriteTime = "";    //00:00形式の操作・無操作時間文字列
+            string logStr = "";          //一時ログに書き込む文字列
             int i = 1;  //ループカウンタ
+
             while (writeTime > _dayRemainingTime)
             {   //その日の残り時間を操作時間が超える場合は繰り返す
                 //その日のログは残り時間までで終了、余りを次の日に回す
                 strWriteTime =
                     _dayRemainingTime.Hours.ToString() + ":" + _dayRemainingTime.Minutes.ToString();
-                //一時ログに書き出す
-                logStr = "," + strWriteTime;
-                sw.WriteLine(logStr);   //改行あり
+                //一時ログ用文字列に書き出す
+                logStr += "," + strWriteTime + Environment.NewLine;
 
                 //一時ログに新しい行を作成
                 //書き込むstringの作成 "PC名,日付,時刻,"
-                string hostName = Environment.MachineName;
-                string strDate = termStartDateTime.AddDays(i).ToShortDateString(); //１日加算
-                string strTime = "0:0";     //０時起算
-                logStr = hostName + "," + strDate + "," + strTime;
-                sw.Write(logStr);   //改行なし
+                logStr += makeTempLogRecord(termStartDateTime.AddDays(i).ToShortDateString(), "0:0");
 
                 if (isOperationTime == false)
                 {   //writeTimeが無操作時間の場合
                     //操作時間"0"を書き込んでおく
-                    logStr = ",0:0";
-                    sw.Write(logStr);
+                    logStr += ",0:0";
                 }
+
                 //変数の再計算
                 writeTime = writeTime - _dayRemainingTime;  //operationtimeから減算
                 _dayRemainingTime = TimeSpan.FromDays(1) - TimeSpan.FromSeconds(1);   //_dayRemainingTimeを初期化(23:59)
                 i++;    //ループカウンタをインクリメント
             }
 
+            _dayRemainingTime = _dayRemainingTime - writeTime;  //_dayRemainingTimeから減算
             //日またぎ計算後のログを一時ログに書く
             strWriteTime = writeTime.Hours.ToString() + ":" + writeTime.Minutes.ToString();
-            _dayRemainingTime = _dayRemainingTime - writeTime;  //_dayRemainingTimeから減算
-            logStr = "," + strWriteTime;
+            logStr += "," + strWriteTime;
             //一時ログファイルに書き出す
-            Debug.WriteLine("writeTempLog," + isOperationTime.ToString() + logStr);
-            sw.Write(logStr);   //改行しない
-            sw.Close();
+            writeLogStr(TEMPLOG, logStr, false);
         }
 
         /// <summary>
@@ -236,8 +257,8 @@ namespace OperationLogger
         /// </summary>
         public void writeEndLog()
         {
-            string logStr;
-            DateTime nowDateTime = DateTime.Now;
+            string logStr;  //ログ書き出し用の文字列
+            DateTime nowDateTime = DateTime.Now;    //終了時間
             //最後のログを書き込んだ一時ログを本ログファイルに書き出し
             if ((nowDateTime - _lastOperationDateTime) > _judgeTimeSpan)
             {   //無操作と判定された場合
@@ -258,17 +279,14 @@ namespace OperationLogger
                 logStr = "," + strOperationTime;
             }
             //一時ログファイルにログを書き出し
-            Debug.WriteLine("writeEndLog" + logStr);
-            StreamWriter sw1 = new StreamWriter(TEMPLOG, true, Encoding.GetEncoding("Shift_JIS"));
-            sw1.Write(logStr);  //改行しない
-            sw1.Close();
-            //一時ログを本ログファイルに書き出し
+            writeLogStr(TEMPLOG, logStr, false);
+            //一時ログをすべて読み込み
             StreamReader sr = new StreamReader(TEMPLOG);
-            StreamWriter sw2 = new StreamWriter(LOGFILE, true, Encoding.GetEncoding("Shift_JIS"));
-            sw2.WriteLine(sr.ReadToEnd());
+            logStr = sr.ReadToEnd();
+            //一時ログを本ログファイルに書き出し
+            writeLogStr(LOGFILE, sr.ReadToEnd(), true);
             sr.Close();
-            sw2.Close();
-            //一時ファイルを消去
+                        //一時ファイルを消去
             File.Delete(TEMPLOG);
         }
     }
