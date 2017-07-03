@@ -9,8 +9,8 @@ EnableMouseClickHook:マウスクリックを操作とみなすかどうか（tu
 -->
 
 <Settings>
-  <JudgeTimeSpan>1441</JudgeTimeSpan>
+  <JudgeTimeSpan>30</JudgeTimeSpan>
   <EnableKeyboardHook>true</EnableKeyboardHook>
-  <EnableMouseMoveHook>false</EnableMouseMoveHook>
-  <EnableMouseClickHook>false</EnableMouseClickHook>
+  <EnableMouseMoveHook>true</EnableMouseMoveHook>
+  <EnableMouseClickHook>true</EnableMouseClickHook>
 </Settings>

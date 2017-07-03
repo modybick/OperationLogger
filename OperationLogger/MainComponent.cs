@@ -57,6 +57,7 @@ namespace OperationLogger
             bool result;
             try
             {
+                //xmlの設定ファイルを読み込む
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.Load(SETTINGFILE);
                 XmlElement rootElement = xmlDoc.DocumentElement;
@@ -259,7 +260,6 @@ namespace OperationLogger
         /// </summary>
         public void writeEndLog()
         {
-            string logStr;  //ログ書き出し用の文字列
             DateTime nowDateTime = DateTime.Now;    //終了時間
             DateTime termStartDateTime = _termStartDateTime;
             TimeSpan operationTime;
