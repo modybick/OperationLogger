@@ -38,7 +38,7 @@ namespace OperationLogger
             _dayRemainingTime = TimeSpan.FromDays(1) - _termStartDateTime.TimeOfDay;    //一日の残り時間
 
             //設定から値を読み込む
-            roadSettings();
+            roadSettings(SETTINGFILE);
             //前回異常終了していないか調べ,異常終了している場合は対処する
             dealAbEnd();
             //一時ログファイルの作成・先頭の書き込み
@@ -52,14 +52,14 @@ namespace OperationLogger
         /// 読み込みに失敗したら、デフォルトの設定を適用する。
         /// </summary>
         /// <returns>読み込み成功=true,読み込み失敗=false</returns>
-        private bool roadSettings()
+        private bool roadSettings(string fileName)
         {
             bool result;
             try
             {
                 //xmlの設定ファイルを読み込む
                 XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load(SETTINGFILE);
+                xmlDoc.Load(fileName);
                 XmlElement rootElement = xmlDoc.DocumentElement;
                 _judgeTimeSpan =
                     TimeSpan.FromMinutes(int.Parse(
@@ -246,7 +246,6 @@ namespace OperationLogger
                 i++;    //ループカウンタをインクリメント
             }
             //変数の再計算
-            _termStartDateTime = DateTime.Now;  //起算日時を進める
             _dayRemainingTime = _dayRemainingTime - writeTime;  //_dayRemainingTimeから減算
             //日またぎ計算後のログを一時ログに書く
             strWriteTime = writeTime.Hours.ToString() + ":" + writeTime.Minutes.ToString();
@@ -271,7 +270,7 @@ namespace OperationLogger
                 operationTime = _lastOperationDateTime - _termStartDateTime;
                 writeTempLog(termStartDateTime, operationTime, true);
                 noOperationTime = nowDateTime - _lastOperationDateTime;
-                writeTempLog(termStartDateTime, noOperationTime, false);
+                writeTempLog(_lastOperationDateTime, noOperationTime, false);
             }
             else
             {   //操作ありと判定された場合
