@@ -43,7 +43,7 @@ namespace OperationLogger
             dealAbEnd();
             //一時ログファイルの作成・先頭の書き込み
             string logStr = makeTempLogRecord(
-                _termStartDateTime.ToShortDateString(), _termStartDateTime.ToShortTimeString());
+                _termStartDateTime.ToShortDateString(), _termStartDateTime.ToLongTimeString());
             writeLogStr(TEMPLOG, logStr, false);
         }
 
@@ -226,29 +226,29 @@ namespace OperationLogger
             {   //その日の残り時間を操作時間が超える場合は繰り返す
                 //その日のログは残り時間までで終了、余りを次の日に回す
                 strWriteTime =
-                    _dayRemainingTime.Hours.ToString() + ":" + _dayRemainingTime.Minutes.ToString();
+                    _dayRemainingTime.Hours.ToString() + ":" + _dayRemainingTime.Minutes.ToString() + ":" + _dayRemainingTime.Seconds.ToString();
                 //一時ログ用文字列に書き出す
                 logStr += "," + strWriteTime + Environment.NewLine;
 
                 //一時ログに新しい行を作成
                 //書き込むstringの作成 "PC名,日付,時刻,"
-                logStr += makeTempLogRecord(termStartDateTime.AddDays(i).ToShortDateString(), "0:0");
+                logStr += makeTempLogRecord(termStartDateTime.AddDays(i).ToShortDateString(), "0:0:0");
 
                 if (isOperationTime == false)
                 {   //writeTimeが無操作時間の場合
                     //操作時間"0"を書き込んでおく
-                    logStr += ",0:0";
+                    logStr += ",0:0:0";
                 }
 
                 //変数の再計算
                 writeTime = writeTime - _dayRemainingTime;  //operationtimeから減算
-                _dayRemainingTime = TimeSpan.FromDays(1) - TimeSpan.FromSeconds(1);   //_dayRemainingTimeを初期化(23:59)
+                _dayRemainingTime = TimeSpan.FromDays(1) - TimeSpan.FromSeconds(1);   //_dayRemainingTimeを初期化(23:59:59)
                 i++;    //ループカウンタをインクリメント
             }
             //変数の再計算
             _dayRemainingTime = _dayRemainingTime - writeTime;  //_dayRemainingTimeから減算
             //日またぎ計算後のログを一時ログに書く
-            strWriteTime = writeTime.Hours.ToString() + ":" + writeTime.Minutes.ToString();
+            strWriteTime = writeTime.Hours.ToString() + ":" + writeTime.Minutes.ToString() + ":" + writeTime.Seconds.ToString() ;
             logStr += "," + strWriteTime;
             //一時ログファイルに書き出す
             writeLogStr(TEMPLOG, logStr, false);
