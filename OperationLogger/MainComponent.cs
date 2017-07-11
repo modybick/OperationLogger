@@ -192,7 +192,7 @@ namespace OperationLogger
             _lastOperationDateTime = nowDateTime;
 
             //前回の操作時間と比較
-            if ((nowDateTime - _lastOperationDateTime) > _judgeTimeSpan)
+            if ((nowDateTime - lastOperationDateTime) > _judgeTimeSpan)
             {   //無操作と判定された場合
                 //変数の更新
                 _termStartDateTime = nowDateTime;
