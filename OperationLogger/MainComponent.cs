@@ -90,9 +90,7 @@ namespace OperationLogger
         {
             if (File.Exists(TEMPLOG))
             {   //前回異常終了していると判断
-
                 //残っている一時ログに異常終了を示す値を付加して本ログに書き込む
-
                 string logStr;  //書き込むレコード
                 //一時ログファイルの読み込み
                 StreamReader sr = new StreamReader(TEMPLOG, Encoding.GetEncoding("Shift_JIS"));
@@ -190,9 +188,14 @@ namespace OperationLogger
         private void processingOperation(
             DateTime termStartDateTime, DateTime lastOperationDateTime, DateTime nowDateTime)
         {
+            //変数の更新
+            _lastOperationDateTime = nowDateTime;
+
             //前回の操作時間と比較
             if ((nowDateTime - _lastOperationDateTime) > _judgeTimeSpan)
             {   //無操作と判定された場合
+                //変数の更新
+                _termStartDateTime = nowDateTime;
                 //非同期で一時ログを書く処理
                 Task writeLogTask = new Task(() =>
                 {
@@ -204,11 +207,9 @@ namespace OperationLogger
                     TimeSpan noOperationTime = nowDateTime - lastOperationDateTime;
                     writeTempLog(lastOperationDateTime, noOperationTime, false);
                 });
+                //非同期タスクの実行
                 writeLogTask.Start();
-                _termStartDateTime = nowDateTime;
             }
-            //変数の更新
-            _lastOperationDateTime = nowDateTime;
         }
 
         /// <summary>
@@ -218,7 +219,7 @@ namespace OperationLogger
         /// <param name="isOperationTime">操作時間=true,無操作時間=false</param>
         public void writeTempLog(DateTime termStartDateTime, TimeSpan writeTime, bool isOperationTime)
         {
-            string strWriteTime = "";   //00:00形式の操作・無操作時間文字列
+            string strWriteTime = "";   //0:0:0形式の操作・無操作時間文字列
             string logStr = "";         //一時ログに書き込む文字列
             int i = 1;                  //ループカウンタ
 
@@ -248,7 +249,7 @@ namespace OperationLogger
             //変数の再計算
             _dayRemainingTime = _dayRemainingTime - writeTime;  //_dayRemainingTimeから減算
             //日またぎ計算後のログを一時ログに書く
-            strWriteTime = writeTime.Hours.ToString() + ":" + writeTime.Minutes.ToString() + ":" + writeTime.Seconds.ToString() ;
+            strWriteTime = writeTime.Hours.ToString() + ":" + writeTime.Minutes.ToString() + ":" + writeTime.Seconds.ToString();
             logStr += "," + strWriteTime;
             //一時ログファイルに書き出す
             writeLogStr(TEMPLOG, logStr, false);
@@ -282,7 +283,7 @@ namespace OperationLogger
             //一時ログを本ログファイルに書き出し
             writeLogStr(LOGFILE, sr.ReadToEnd(), true);
             sr.Close();
-                        //一時ファイルを消去
+            //一時ファイルを消去
             File.Delete(TEMPLOG);
         }
     }
