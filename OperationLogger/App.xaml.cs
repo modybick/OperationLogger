@@ -69,7 +69,7 @@ namespace OperationLogger
         private void Application_Exit(object sender, ExitEventArgs e)
         {
             //終了時の処理
-            this.mainComponent.endProcess();
+            this.mainComponent.writeEndLog();
 
             _mutex.ReleaseMutex();
             _mutex.Close();
