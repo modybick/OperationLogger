@@ -200,7 +200,7 @@ namespace OperationLogger
                     writeTempLog(termStartDateTime, operationTime, true);
                     //無操作時間の計算（日をまたぐパターンを考慮）
                     TimeSpan noOperationTime = nowDateTime - lastOperationDateTime;
-                    writeTempLog(termStartDateTime, noOperationTime, false);
+                    writeTempLog(lastOperationDateTime, noOperationTime, false);
                 });
                 writeLogTask.Start();
                 _termStartDateTime = nowDateTime;
@@ -216,9 +216,9 @@ namespace OperationLogger
         /// <param name="isOperationTime">操作時間=true,無操作時間=false</param>
         public void writeTempLog(DateTime termStartDateTime, TimeSpan writeTime, bool isOperationTime)
         {
-            string strWriteTime = "";    //00:00形式の操作・無操作時間文字列
-            string logStr = "";          //一時ログに書き込む文字列
-            int i = 1;  //ループカウンタ
+            string strWriteTime = "";   //00:00形式の操作・無操作時間文字列
+            string logStr = "";         //一時ログに書き込む文字列
+            int i = 1;                  //ループカウンタ
 
             while (writeTime > _dayRemainingTime)
             {   //その日の残り時間を操作時間が超える場合は繰り返す
@@ -243,7 +243,8 @@ namespace OperationLogger
                 _dayRemainingTime = TimeSpan.FromDays(1) - TimeSpan.FromSeconds(1);   //_dayRemainingTimeを初期化(23:59)
                 i++;    //ループカウンタをインクリメント
             }
-
+            //変数の再計算
+            _termStartDateTime = DateTime.Now;  //起算日時を進める
             _dayRemainingTime = _dayRemainingTime - writeTime;  //_dayRemainingTimeから減算
             //日またぎ計算後のログを一時ログに書く
             strWriteTime = writeTime.Hours.ToString() + ":" + writeTime.Minutes.ToString();
@@ -259,27 +260,23 @@ namespace OperationLogger
         {
             string logStr;  //ログ書き出し用の文字列
             DateTime nowDateTime = DateTime.Now;    //終了時間
+            DateTime termStartDateTime = _termStartDateTime;
+            TimeSpan operationTime;
+            TimeSpan noOperationTime;
             //最後のログを書き込んだ一時ログを本ログファイルに書き出し
             if ((nowDateTime - _lastOperationDateTime) > _judgeTimeSpan)
             {   //無操作と判定された場合
                 //書き出す文字列を作成
-                TimeSpan operationTime = _lastOperationDateTime - _termStartDateTime;
-                string strOperationTime =
-                    operationTime.Hours.ToString() + ":" + operationTime.Minutes.ToString();
-                TimeSpan noOperationTime = nowDateTime - _lastOperationDateTime;
-                string strNoOperationTime =
-                    noOperationTime.Hours.ToString() + ":" + noOperationTime.Minutes.ToString();
-                logStr = "," + strOperationTime + "," + strNoOperationTime;
+                operationTime = _lastOperationDateTime - _termStartDateTime;
+                writeTempLog(termStartDateTime, operationTime, true);
+                noOperationTime = nowDateTime - _lastOperationDateTime;
+                writeTempLog(termStartDateTime, noOperationTime, false);
             }
             else
             {   //操作ありと判定された場合
-                TimeSpan operationTime = nowDateTime - _termStartDateTime;
-                string strOperationTime =
-                    operationTime.Hours.ToString() + ":" + operationTime.Minutes.ToString();
-                logStr = "," + strOperationTime;
+                operationTime = nowDateTime - _termStartDateTime;
+                writeTempLog(termStartDateTime, operationTime, true);
             }
-            //一時ログファイルにログを書き出し
-            writeLogStr(TEMPLOG, logStr, false);
             //一時ログをすべて読み込み
             StreamReader sr = new StreamReader(TEMPLOG);
             //一時ログを本ログファイルに書き出し
