@@ -81,6 +81,7 @@ namespace OperationLogger
             }
             return result;
         }
+
         /// <summary>
         /// 前回異常終了していないか調べ、している場合は対処する
         /// </summary>
